@@ -1239,8 +1239,8 @@ input[type="date"]:read-only {
 }
 
 /* 공휴일 관리: 고정휴일·변동휴일 배지 글자 12px, 입력 필드 높이 40px */
-#cfSubHoliday .group-badge { font-size: 12px; letter-spacing: -1px; }
-#cfSubHoliday .cf-hol-input { height: 40px !important; }
+#cfSubSolarHoliday .group-badge, #cfSubVarHoliday .group-badge { font-size: 12px; letter-spacing: -1px; }
+#cfSubSolarHoliday .cf-hol-input, #cfSubVarHoliday .cf-hol-input { height: 40px !important; }
 
 /* 등록·수정 화면과 모달의 사용자 입력 필드 규격: 높이 40px (검색·필터·표 안의 칸은 제외) */
 #cfModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="color"]):not([type="file"]),
@@ -5744,7 +5744,10 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           <div class="summary-card" style="padding: 0 14px !important; margin: 10px 0 0 !important; box-sizing: border-box; height: 40px; border: 1px solid #FF9800 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #000000; cursor: pointer;" onclick="cfOpenSubPage(&#39;cfSubRule&#39;)">고정항목관리(수정/삭제)</div>
 
           <!-- 공휴일 (클릭 시 모달 페이지) -->
-          <div class="summary-card" style="padding: 0 14px !important; margin: 10px 0 0 !important; box-sizing: border-box; height: 40px; border: 1px solid #FF9800 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #000000; cursor: pointer;" onclick="cfOpenSubPage(&#39;cfSubHoliday&#39;)">공휴일관리(등록/삭제)</div>
+          <div class="summary-card" style="padding: 0 14px !important; margin: 10px 0 0 !important; box-sizing: border-box; height: 40px; border: 1px solid #FF9800 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #000000; cursor: pointer;" onclick="cfOpenSubPage(&#39;cfSubSolarHoliday&#39;)">고정휴일관리(등록/삭제)</div>
+
+          <!-- 변동휴일 (클릭 시 모달 페이지) -->
+          <div class="summary-card" style="padding: 0 14px !important; margin: 10px 0 0 !important; box-sizing: border-box; height: 40px; border: 1px solid #FF9800 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #000000; cursor: pointer;" onclick="cfOpenSubPage(&#39;cfSubVarHoliday&#39;)">변동휴일관리(등록/삭제)</div>
 
           <!-- 추가 안내 중첩 카드 (공휴일관리 아래) -->
           <div class="stock-sub-card" style="background-color:#F5F5F5; border:1px solid #00A8A8; border-radius:12px; box-shadow:none; padding:10px 12px; margin-top:10px;">
@@ -5905,11 +5908,11 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
       </div>
     </div>
 
-    <div id="cfSubHoliday" style="display: none; position: fixed; inset: 0px; z-index: 1900; background-color: var(--color-bg-primary); overflow-y: auto; padding: 16px 16px 77px; box-sizing: border-box;">
+    <div id="cfSubSolarHoliday" style="display: none; position: fixed; inset: 0px; z-index: 1900; background-color: var(--color-bg-primary); overflow-y: auto; padding: 16px 16px 77px; box-sizing: border-box;">
       <div class="summary-card" style="margin-top: 0 !important; margin-bottom: 0 !important; background-color: #FFFFFF; border: none; padding: 16px; box-shadow: var(--shadow-card);">
         <div style="margin-bottom: 8px;"><div style="display: flex; align-items: center; gap: 8px; margin-top: -8px;">
           <span class="badge group-badge" data-group="배우자">고정휴일</span>
-          <span style="font-size: 17px; font-weight: 700; color: #00A8A8; white-space: nowrap;">공휴일관리<span style="font-size: 16px;">(등록/삭제)</span></span>
+          <span style="font-size: 17px; font-weight: 700; color: #00A8A8; white-space: nowrap;">고정휴일관리<span style="font-size: 16px;">(등록/삭제)</span></span>
         </div></div>
         <div>
       <div style="font-size: 12px; font-weight: 500; color: #000000; margin: 8px 0;">📢 토·일과 매년 일자가 동일한 고정 공휴일은 자동 반영됩니다.(MM-DD로 입력)</div>
@@ -5920,16 +5923,20 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
         <input class="form-input cf-hol-input" id="cfSolarMd" inputmode="numeric" placeholder="예) 07-17" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; font-size: 15px; height: 35px; padding-left: 6px; padding-right: 6px;">
         <input class="form-input cf-hol-input" id="cfSolarName" placeholder="예) 제헌절" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; font-size: 15px; height: 35px; padding-left: 6px; padding-right: 6px;">
       </div>
-      <div style="display: flex; justify-content: center; margin-top: 6px;">
-        <button class="honeypot-button-save" onclick="cfAddSolar()" style="width:63px; height:30px; padding:0; font-size:14px; font-weight:700; box-sizing:border-box;">추가</button>
-      </div>
       </div>
         </div>
       </div>
-      <div class="summary-card" style="margin-top: 20px !important; margin-bottom: 0 !important; background-color: #FFFFFF; border: none; padding: 16px; box-shadow: var(--shadow-card);">
+      <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1901; display: flex; gap: 12px; justify-content: center; align-items: center; padding: 10px 14px; background-color: var(--color-bg-primary); border-top: 1px solid #E0E0E0;">
+        <button class="honeypot-button-cancel" onclick="cfCloseSubPage()">닫기</button>
+        <button class="honeypot-button-save" onclick="cfAddSolar()">추가</button>
+      </div>
+    </div>
+
+    <div id="cfSubVarHoliday" style="display: none; position: fixed; inset: 0px; z-index: 1900; background-color: var(--color-bg-primary); overflow-y: auto; padding: 16px 16px 77px; box-sizing: border-box;">
+      <div class="summary-card" style="margin-top: 0 !important; margin-bottom: 0 !important; background-color: #FFFFFF; border: none; padding: 16px; box-shadow: var(--shadow-card);">
         <div style="margin-bottom: 8px;"><div style="display: flex; align-items: center; gap: 8px; margin-top: -8px;">
           <span class="badge group-badge" data-group="배우자">변동휴일</span>
-          <span style="font-size: 17px; font-weight: 700; color: #00A8A8; white-space: nowrap;">변동휴일목록<span style="font-size: 16px;">(등록/삭제)</span></span>
+          <span style="font-size: 17px; font-weight: 700; color: #00A8A8; white-space: nowrap;">변동휴일관리<span style="font-size: 16px;">(등록/삭제)</span></span>
         </div></div>
         <div>
       <div style="font-size: 12px; font-weight: 500; color: #000000; margin: 8px 0;">📢 설·추석·부처님오신날·대체공휴일처럼 매년 바뀌는 날은 한 줄에 하나씩 'YYYY-MM-DD' '이름' 형식으로 입력하세요.<br>예) 2027-09-14 추석연휴, 2027-09-15 추석, 2027-09-16 추석연휴, 등으로 추가입력</div>
@@ -5940,13 +5947,13 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           <input class="form-input cf-hol-input" id="cfHolDate" placeholder="예) YYYY-MM-DD" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; font-size: 15px; height: 35px; padding-left: 6px; padding-right: 6px;">
           <input class="form-input cf-hol-input" id="cfHolName" placeholder="예) 임시공휴일" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; font-size: 15px; height: 35px; padding-left: 6px; padding-right: 6px;">
         </div>
-        <button class="honeypot-button-save" onclick="cfAddHolidayLine()" style="align-self: center; width:63px; height:30px; padding:0; font-size:14px; font-weight:700; box-sizing:border-box;">추가</button>
       </div>
       </div>
         </div>
       </div>
       <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1901; display: flex; gap: 12px; justify-content: center; align-items: center; padding: 10px 14px; background-color: var(--color-bg-primary); border-top: 1px solid #E0E0E0;">
         <button class="honeypot-button-cancel" onclick="cfCloseSubPage()">닫기</button>
+        <button class="honeypot-button-save" onclick="cfAddHolidayLine()">추가</button>
       </div>
     </div>
 
@@ -9094,10 +9101,11 @@ function cfDelSolar(md) {
 function cfOpenSubPage(id) {
   const el = document.getElementById(id);
   if (el) el.style.display = 'block';
-  if (id === 'cfSubHoliday') { cfRenderSolarList(); cfRenderHolidayList(); }
+  if (id === 'cfSubSolarHoliday') cfRenderSolarList();
+  if (id === 'cfSubVarHoliday') cfRenderHolidayList();
 }
 function cfCloseSubPage() {
-  ['cfSubRule', 'cfSubHoliday'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  ['cfSubRule', 'cfSubSolarHoliday', 'cfSubVarHoliday'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
 
 function cfToggleMonth(v) {
