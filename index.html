@@ -27913,6 +27913,20 @@ function memoEsc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+// 메모 내용의 주소(http://, https://, www.)를 누르면 새 탭에서 바로 열리도록 링크로 바꿈
+function memoLinkify(s) {
+  const raw = String(s == null ? '' : s);
+  const re = /((?:https?:\/\/|www\.)[^\s<>"'`]*[^\s<>"'`.,;:!?)\]}])/gi;
+  let out = '', last = 0, m;
+  while ((m = re.exec(raw))) {
+    out += memoEsc(raw.slice(last, m.index));
+    const url = m[0];
+    const href = /^www\./i.test(url) ? 'https://' + url : url;
+    out += '<a href="' + memoEsc(href) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="color:#0066CC; text-decoration:underline; word-break:break-all;">' + memoEsc(url) + '</a>';
+    last = m.index + url.length;
+  }
+  return out + memoEsc(raw.slice(last));
+}
 function memoLoad() {
   try {
     const v = JSON.parse(localStorage.getItem(MEMO_KEY) || '[]');
@@ -28189,7 +28203,7 @@ function memoOpenDetail(id) {
     + '<span style="font-size: 15px; font-weight: 700; color: #FF00FF; white-space: nowrap;">' + label + '</span>'
     + '<span style="margin-left: auto; font-size: 13px; font-weight: 700; color: #00A8A8; white-space: nowrap;">' + label + ' ' + memoNumber(id) + '</span></div>'
     + '<div style="margin-top: 5px; padding: 3px 0; border-top: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; font-size: 14px; font-weight: 700; color: #00A8A8; word-break: break-all;">' + memoEsc(m.title) + '</div>'
-    + '<div style="margin-top: 10px; font-size: 14px; font-weight: 400; line-height: 20px; color: #000000; text-align: left; white-space: pre-wrap; word-break: break-all;">' + memoEsc(m.body) + '</div></div>';
+    + '<div style="margin-top: 10px; font-size: 14px; font-weight: 400; line-height: 20px; color: #000000; text-align: left; white-space: pre-wrap; word-break: break-all;">' + memoLinkify(m.body) + '</div></div>';
   const footer = '<button type="button" class="honeypot-button-delete" style="' + MEMO_BTN_STYLE + '" onclick="memoConfirmDelete(\'' + id + '\')">삭제</button>'
     + '<button type="button" class="honeypot-button-save" style="' + MEMO_BTN_STYLE + '" onclick="memoOpenEdit(\'' + id + '\')">수정</button>'
     + '<button type="button" class="honeypot-button-cancel" style="' + MEMO_BTN_STYLE + '" onclick="cfCloseModal()">닫기</button>';
