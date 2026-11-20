@@ -2552,7 +2552,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
     <div id="memo-management-page" class="page-content" style="padding-bottom: 41px;">
       <div style="display: flex; gap: 8px;"><div class="summary-card" onclick="memoOpenCatManage()" style="margin: 0 !important; flex: 1 1 0; min-width: 0; padding: 0 14px !important; box-sizing: border-box; height: 40px; border-radius: 6px !important; border: 1px solid #FF0000 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #FF0000; cursor: pointer;">분류관리</div><div class="summary-card" onclick="memoOpenAdd()" style="margin: 0 !important; flex: 1 1 0; min-width: 0; padding: 0 14px !important; box-sizing: border-box; height: 40px; border-radius: 6px !important; border: 1px solid #FF0000 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #FF0000; cursor: pointer;">메모추가</div></div>
       <div id="memoChips" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; margin-top: 12px;"></div>
-      <div style="position: relative; margin-top: 12px;"><input type="text" id="memoKeywordSearch" placeholder="키워드 검색" onkeydown="if(event.key==='Enter')memoSearchRun()" style="width: 100%; height: 40px; border: 2px solid #FF9800; border-radius: 6px; padding: 0 72px 0 10px; font-size: 15px; box-sizing: border-box; background-color: #FFFFFF; color: #1A1A1A;"><button type="button" onclick="memoSearchRun()" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); height: 30px; min-width: 58px; padding: 0 10px; border: none; border-radius: 6px; background-color: #FF9800; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer;">확인</button></div>
+      <div style="position: relative; margin-top: 12px;"><input type="text" id="memoKeywordSearch" placeholder="키워드 검색" oninput="memoKeywordInput(this.value)" onkeydown="if(event.key==='Enter')memoSearchRun()" style="width: 100%; height: 40px; border: 2px solid #FF9800; border-radius: 6px; padding: 0 72px 0 10px; font-size: 15px; box-sizing: border-box; background-color: #FFFFFF; color: #1A1A1A;"><button type="button" onclick="memoSearchRun()" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); height: 30px; min-width: 58px; padding: 0 10px; border: none; border-radius: 6px; background-color: #FF9800; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer;">확인</button></div>
       <div id="memoCardList" style="display: flex; flex-direction: column; gap: 15px; margin-top: 12px;"></div>
       <div id="memoSpacer" aria-hidden="true" style="height: 62px; flex-shrink: 0;"></div>
       <!-- 하단 고정 바: 닫기 -->
@@ -2576,7 +2576,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
       <div id="stockFilterBar"><div style="display:flex; gap:12px; margin-bottom:6px;"><div style="flex:1; min-width:0;"><select class="add-product-input" style="width:100%; height:40px; box-sizing:border-box; border:1px solid #00A8A8 !important;" onchange="setStockFilter(&#39;group&#39;, this.value)"><option value="all" selected="">그룹 전체</option><option value="본인">본인</option><option value="배우자">배우자</option></select></div><div style="flex:1; min-width:0;"><select class="add-product-input" style="width:100%; height:40px; box-sizing:border-box; border:1px solid #00A8A8 !important;" onchange="setStockFilter(&#39;year&#39;, this.value)"><option value="all" selected="">년도 전체</option></select></div></div><div style="display:flex; gap:12px; margin-bottom:6px;"><div style="flex:1; min-width:0;"><select class="add-product-input" style="width:100%; height:40px; box-sizing:border-box; border:1px solid #00A8A8 !important;" onchange="setStockFilter(&#39;tradeType&#39;, this.value)"><option value="all" selected="">구분 전체</option><option value="매수">매수</option><option value="매도">매도</option><option value="배당">배당</option></select></div><div style="flex:1; min-width:0;"><select class="add-product-input" style="width:100%; height:40px; box-sizing:border-box; border:1px solid #00A8A8 !important;" onchange="setStockFilter(&#39;holding&#39;, this.value)"><option value="all" selected="">보유 전체</option><option value="holding">보유중</option><option value="closed">정리완료</option></select></div></div></div>
       <!-- 키워드 검색 필드 (필터 아래 일렬, 주황색 테두리) -->
       <div style="position: relative; display: flex; align-items: center; margin-top: 0;">
-        <input type="text" id="stockKeywordSearch" oninput="setStockKeyword(this.value)" placeholder="키워드 검색" style="width: 100%; height: 40px; padding: 10px 60px 10px 12px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
+        <input type="text" id="stockKeywordSearch" oninput="setStockKeyword(kwLive(this.value))" placeholder="키워드 검색" style="width: 100%; height: 40px; padding: 10px 60px 10px 12px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
         <button type="button" onclick="setStockKeyword(document.getElementById('stockKeywordSearch').value)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background-color: #FF8C00; color: white; border: none; border-radius: 3px; width: 52px; height: 28px; padding: 0; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; z-index: 2;">확인</button>
       </div>
       <div id="stockListContainer" style="margin-top: 0;"><div style="padding:24px 8px; text-align:center; color:#888888; font-size:14px;">등록된 주식이 없습니다. 주식등록에서 체결 내역을 저장해 주세요.</div></div>
@@ -5711,7 +5711,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
       <!-- 키워드 검색: 만기지난상품 보기 아래, 한 줄 전체 -->
       <div style="margin-top: 6px;">
         <div style="position: relative; display: flex; align-items: center;">
-          <input type="text" inputmode="text" id="productKeywordSearchEval" placeholder="키워드 검색" style="width: 100%; padding: 10px 12px; padding-right: 50px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
+          <input type="text" inputmode="text" id="productKeywordSearchEval" placeholder="키워드 검색" oninput="kyungRenderList()" style="width: 100%; padding: 10px 12px; padding-right: 50px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
           <button type="button" onclick="kyungRenderList()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background-color: #FF8C00; color: white; border: none; border-radius: 3px; padding: 0; width: 51px; height: 29px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; z-index: 2;">확인</button>
         </div>
       </div>
@@ -9489,7 +9489,7 @@ function kyungRenderList() {
   const notice = '<div style="font-size:14px; font-weight:400; color:#FF0000; text-align:left; line-height:17px; margin:-5px 0 0 0; padding:0 0 15px 0; text-indent:-21px; padding-left:21px;">📢 아래의 카드를 선택하면,<br>수정/삭제 할 수 있습니다</div>';
   // 키워드 검색: 입력한 글자가 카드의 어떤 항목에라도 들어 있으면 표시
   const kwEl = document.getElementById('productKeywordSearchEval');
-  const k = ((kwEl && kwEl.value) || '').trim().toLowerCase();
+  const k = kwLive((kwEl && kwEl.value) || '').trim().toLowerCase();
   const gEl = document.getElementById('productGroupFilterEval');
   const g = gEl ? gEl.value : 'all';
   const rEl = document.getElementById('productInterestRateFilterEval');
@@ -11472,7 +11472,7 @@ function applyKeywordAndCategoryFilter() {
   const hideExpiredCheckbox = document.getElementById('hideExpiredAllCheckbox');
   const showOneMonthCheckbox = document.getElementById('showOneMonthCheckbox');
 
-  const keyword = keywordSearch ? keywordSearch.value.toLowerCase().trim() : '';
+  const keyword = keywordSearch ? kwLive(keywordSearch.value).toLowerCase().trim() : '';
   const group = groupFilter ? groupFilter.value : 'all';
   const interestRate = interestRateFilter ? interestRateFilter.value : 'all';
   const productType = productTypeFilter ? productTypeFilter.value : 'all';
@@ -11562,7 +11562,7 @@ function applyKeywordAndCategoryFilter() {
     const productName = (card.getAttribute('data-product') || '').toLowerCase();
 
     // 현재 보이는 상품 찾기
-    const keyword = keywordSearch ? keywordSearch.value.toLowerCase().trim() : '';
+    const keyword = keywordSearch ? kwLive(keywordSearch.value).toLowerCase().trim() : '';
     if (!keyword || productName.includes(keyword) || bankName.includes(keyword)) {
       // data 속성으로 찾을 수 있는 고유한 식별자 사용
       const key = `${bankName}_${productName}`;
@@ -11944,7 +11944,7 @@ function attachInterestFilterListeners() {
   const keywordSearch = document.getElementById('interestKeywordSearch');
   if (keywordSearch) {
     keywordSearch.addEventListener('input', function() {
-      interestOverviewState.keyword = this.value.toLowerCase().trim();
+      interestOverviewState.keyword = kwLive(this.value).toLowerCase().trim();
       console.log('🔍 키워드 검색 변경:', interestOverviewState.keyword);
       renderInterestOverviewUnified();
     });
@@ -22980,7 +22980,7 @@ function renderProductsList() {
     const showOneMonth = document.getElementById('showOneMonthCheckbox');
     const hideExpired = document.getElementById('hideExpiredAllCheckbox');
 
-    const keyword = (keywordInput ? keywordInput.value.toLowerCase() : '').trim();
+    const keyword = (keywordInput ? kwLive(keywordInput.value).toLowerCase() : '').trim();
     const sortBy = sortDropdown ? sortDropdown.value : 'maturity';
     const selectedGroup = groupFilter ? groupFilter.value : 'all';
     const selectedRate = interestRateFilter ? interestRateFilter.value : 'all';
@@ -27990,6 +27990,15 @@ function memoMigrate() {
   } catch (e) { }
 }
 
+// 키워드 검색 공통: 글자 수 제한 없이 입력과 동시에 필터, 빈칸이면 전체 표시
+function kwLive(v) {
+  return String(v == null ? '' : v);
+}
+// 메모 검색: 입력과 동시에 필터
+function memoKeywordInput(v) {
+  memoKeyword = kwLive(v);
+  memoRenderAll();
+}
 // 키워드 검색: 확인 버튼 또는 Enter로 실행 (제목·내용에서 찾음)
 function memoSearchRun() {
   const el = document.getElementById('memoKeywordSearch');
