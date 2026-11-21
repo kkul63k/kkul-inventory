@@ -1,7 +1,7 @@
 {
   "name": "꿀단지",
   "short_name": "꿀단지",
-  "start_url": "./",
+  "start_url": "./kkul-inventory.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#00A8A8",
