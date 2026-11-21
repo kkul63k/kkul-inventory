@@ -1703,11 +1703,11 @@ textarea.add-product-input[data-filled="true"] {
 }
 /* 상품등록에 반영 버튼: 두 줄로 표시 (글자 12px, 최소 63px 폭, 높이 30px 안에 맞춤) */
 #calcPrepayLinkButton { white-space: normal !important; font-size: 12px !important; line-height: 1.1 !important; width: auto !important; min-width: 63px !important; height: 30px !important; padding: 0 6px !important; text-align: center !important; }
-/* 하단 고정 바 안쪽 여백: 위 8px, 아래 8px (좌우는 기존 유지) → 바 전체 높이 47px */
+/* 하단 고정 바 안쪽 여백: 위 7px, 아래 7px (좌우는 기존 유지) → 바 전체 높이 45px (버튼 30 + 여백 14 + 윗선 1) */
 [style*="position: fixed; bottom: 0"],
 [style*="position:fixed;bottom:0"] {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
 }
 
 /* Active 페이지의 닫기 버튼만 표시 */
@@ -11017,7 +11017,7 @@ function showNotification(message, duration = 2000, type = 'default', buttonElem
 // ============================================
 // 커스텀 확인 모달
 // ============================================
-function showConfirmModal(message, onConfirm, onCancel, confirmBtnText = '확인', confirmBtnColor = '#007BFF', messageColor = '#333') {
+function showConfirmModal(message, onConfirm, onCancel, confirmBtnText = '확인', confirmBtnColor = '#007BFF', messageColor = '#333', confirmFirst = false) {
   // 기존 모달이 있으면 제거
   const existingModal = document.querySelector('.confirm-modal-overlay');
   if (existingModal) {
@@ -11111,7 +11111,7 @@ function showConfirmModal(message, onConfirm, onCancel, confirmBtnText = '확인
   };
 
   // 삭제 확인창만 삭제를 왼쪽, 취소를 오른쪽에 둠 (그 밖의 확인창은 기존 순서 유지)
-  const isDeleteConfirm = confirmBtnText === '삭제' || confirmBtnColor === '#FF0000';
+  const isDeleteConfirm = confirmBtnText === '삭제' || confirmBtnColor === '#FF0000' || confirmFirst;
   if (isDeleteConfirm) {
     buttonContainer.appendChild(confirmBtn);
     buttonContainer.appendChild(cancelBtn);
@@ -26313,6 +26313,9 @@ function kkulShowExportBox(json) {
 }
 
 function exportMenuDataLegacy() {
+  showConfirmModal('현재 데이터를 클립보드에 복사합니다. 진행하겠습니까?', exportMenuDataLegacyRun, null, '확인', '#00A8A8', '#333', true);
+}
+function exportMenuDataLegacyRun() {
   // localStorage에서 직접 products 데이터 로드 (전역 변수 대신 안정성을 위해)
   const savedProducts = JSON.parse(localStorage.getItem('products') || '[]');
 
@@ -26347,6 +26350,9 @@ function exportMenuDataLegacy() {
 
 // ✅ 새로운 함수: 데이터를 JSON 파일로 자동 다운로드
 function exportMenuDataAsFile() {
+  showConfirmModal('현재 데이터를 백업 파일로 저장합니다. 진행하겠습니까?', exportMenuDataAsFileRun, null, '확인', '#00A8A8', '#333', true);
+}
+function exportMenuDataAsFileRun() {
   console.log('%c📥 exportMenuDataAsFile() 함수 시작 - 파일 자동 다운로드', 'color: #2196F3; font-weight: bold; font-size: 14px;');
 
   try {
@@ -26385,7 +26391,7 @@ function exportMenuDataAsFile() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    showNotification(`✓ 데이터가 '${filename}'으로 다운로드되었습니다.`);
+    showNotification('✓ 백업되었습니다');
     console.log('✅ 파일 다운로드 완료');
 
     // 동시에 localStorage에도 자동으로 백업 저장
@@ -26430,6 +26436,9 @@ function saveBackupToStorage(data) {
 
 // ✅ 수동으로 백업 저장 (버튼 클릭)
 function saveBackupToStorageManual() {
+  showConfirmModal('현재 데이터를 백업으로 저장합니다. 진행하겠습니까?', saveBackupToStorageManualRun, null, '확인', '#00A8A8', '#333', true);
+}
+function saveBackupToStorageManualRun() {
   console.log('%c⚡ saveBackupToStorageManual() 함수 시작', 'color: #FF9800; font-weight: bold; font-size: 14px;');
 
   try {
@@ -26445,7 +26454,7 @@ function saveBackupToStorageManual() {
     };
 
     saveBackupToStorage(data);
-    showNotification('✓ 백업이 저장되었습니다.');
+    showNotification('✓ 백업되었습니다');
   } catch (err) {
     console.error('❌ 수동 백업 저장 실패:', err);
     showNotification('❌ 백업 저장에 실패했습니다: ' + err.message);
@@ -26528,6 +26537,9 @@ function showBackupList() {
 
 // ✅ localStorage에서 백업 로드 및 복구
 function loadBackupFromStorage(timestamp) {
+  showConfirmModal('현재 데이터가 삭제되고 선택한 백업의 데이터로 바뀝니다. 복원하겠습니까?', function () { loadBackupFromStorageRun(timestamp); }, null, '복원', '#FF0000');
+}
+function loadBackupFromStorageRun(timestamp) {
   console.log('%c📥 loadBackupFromStorage() 함수 시작:', 'color: #4CAF50; font-weight: bold; font-size: 14px;', timestamp);
 
   try {
@@ -26572,7 +26584,7 @@ function loadBackupFromStorage(timestamp) {
     // 모달 닫기
     document.getElementById('backupListModal').style.display = 'none';
 
-    showNotification('✓ 백업이 복구되었습니다. 페이지를 새로고침합니다.');
+    showNotification('✓ 복원되었습니다');
 
     // 페이지 새로고침
     setTimeout(() => {
@@ -26609,6 +26621,20 @@ function deleteBackupFromStorage(timestamp) {
 
 // ✅ 새로운 함수: 파일을 선택해서 자동으로 데이터 복구
 function importMenuDataFromFile(event) {
+  const pickedFile = event.target.files && event.target.files[0];
+  if (!pickedFile) return;
+  const pickReader = new FileReader();
+  pickReader.onerror = function () { showNotification('❌ 파일을 읽을 수 없습니다'); };
+  pickReader.onload = function (ev) {
+    let okData = false;
+    try { const d = JSON.parse(ev.target.result); okData = !!d && typeof d === 'object'; } catch (e) { okData = false; }
+    if (!okData) { showNotification('올바른 백업 파일이 아닙니다'); return; }
+    showConfirmModal('현재 데이터가 삭제되고 백업 파일의 데이터로 바뀝니다. 복원하겠습니까?', function () { importMenuDataFromFileRun({ target: { files: [pickedFile], value: '' } }); }, null, '복원', '#FF0000');
+  };
+  pickReader.readAsText(pickedFile);
+  event.target.value = '';
+}
+function importMenuDataFromFileRun(event) {
   console.log('%c📤 importMenuDataFromFile() 함수 시작 - 파일 자동 복구', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
 
   const file = event.target.files[0];
@@ -26671,7 +26697,7 @@ function importMenuDataFromFile(event) {
       }
 
       console.log('%c✅ 모든 데이터 복구 완료!', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
-      showNotification('✓ 모든 데이터가 복구되었습니다.\n페이지를 새로고침합니다.');
+      showNotification('✓ 복원되었습니다');
 
       // 페이지 새로고침
       setTimeout(() => {
@@ -26793,6 +26819,14 @@ function importMenuData() {
 
 // 텍스트 입력에서 JSON 파싱하여 데이터 복원
 function handleTextImport() {
+  const pasteBox = document.getElementById('importTextArea');
+  const pasteText = pasteBox ? pasteBox.value.trim() : '';
+  let pasteOk = false;
+  try { pasteOk = !!pasteText && !!JSON.parse(pasteText); } catch (e) { pasteOk = false; }
+  if (!pasteOk) { handleTextImportRun(); return; }
+  showConfirmModal('현재 데이터가 삭제되고 붙여넣은 백업의 데이터로 바뀝니다. 복원하겠습니까?', handleTextImportRun, null, '복원', '#FF0000');
+}
+function handleTextImportRun() {
   console.log('%c📥 handleTextImport() 함수 시작', 'color: #FF6B6B; font-weight: bold; font-size: 14px;');
   const textarea = document.getElementById('importTextArea');
   const jsonText = textarea.value.trim();
@@ -26846,7 +26880,7 @@ function handleTextImport() {
     renderSelectFieldsManager();
     console.log('✅ 모든 화면 렌더링 완료');
 
-    showNotification('✓ 전체 데이터를 복원했습니다', 2000, 'save');
+    showNotification('✓ 복원되었습니다');
     setTimeout(() => location.reload(), 1500);
     console.log('%c✅ 데이터 복원 완료!', 'color: #2ECC71; font-weight: bold; font-size: 14px;');
 
@@ -27419,7 +27453,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <!-- 선납이연 일정조정 팝업 (계산기 수정하기) -->
   <!-- 팝업 뒤 배경: 카드와 하단 바 사이 공백에 뒤 페이지 내용이 비치지 않도록 페이지 배경색으로 덮음 -->
   <div id="calc-edit-backdrop" style="display: none; position: fixed; top: 56px; bottom: 0; left: 0; right: 0; z-index: 1099; background: var(--color-bg-gradient);"></div>
-  <div id="calc-edit-overlay" style="display: none; position: fixed; top: 56px; bottom: 72px; left: 8px; right: 8px; z-index: 1200; background-color: #FFFFFF; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); flex-direction: column; overflow: hidden;">
+  <div id="calc-edit-overlay" style="display: none; position: fixed; top: 56px; bottom: 75px; left: 8px; right: 8px; z-index: 1200; background-color: #FFFFFF; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); flex-direction: column; overflow: hidden;">
     <div id="calcEditHeader" style="flex-shrink: 0; box-sizing: border-box; height: 47px; background-color: #FFFFFF;"></div>
     <div id="calcEditBody" style="flex: 1; overflow-y: auto; padding: 1px 14px 13px; -webkit-overflow-scrolling: touch;">
       <div id="calcEditContent" style="margin-top: -17px;"></div>
