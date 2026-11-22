@@ -2575,7 +2575,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
     <div id="memo-management-page" class="page-content" style="padding-bottom: 41px;">
       <div style="display: flex; gap: 8px;"><div class="summary-card" onclick="memoOpenCatManage()" style="margin: 0 !important; flex: 1 1 0; min-width: 0; padding: 0 14px !important; box-sizing: border-box; height: 40px; border-radius: 6px !important; border: 1px solid #FF0000 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #FF0000; cursor: pointer;">분류관리</div><div class="summary-card" onclick="memoOpenAdd()" style="margin: 0 !important; flex: 1 1 0; min-width: 0; padding: 0 14px !important; box-sizing: border-box; height: 40px; border-radius: 6px !important; border: 1px solid #FF0000 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #FF0000; cursor: pointer;">메모추가</div></div>
       <div id="memoChips" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; margin-top: 12px;"></div>
-      <div style="position: relative; margin-top: 12px;"><input type="text" id="memoKeywordSearch" placeholder="키워드 검색" oninput="memoKeywordInput(this.value)" onkeydown="if(event.key==='Enter')memoSearchRun()" style="width: 100%; height: 40px; border: 2px solid #FF9800; border-radius: 6px; padding: 0 72px 0 10px; font-size: 15px; box-sizing: border-box; background-color: #FFFFFF; color: #1A1A1A;"><button type="button" onclick="memoSearchRun()" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); height: 30px; min-width: 58px; padding: 0 10px; border: none; border-radius: 6px; background-color: #FF9800; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer;">확인</button></div>
+      <div style="position: relative; margin-top: 12px;"><input type="text" id="memoKeywordSearch" placeholder="키워드 검색" oninput="memoKeywordInput(this.value)" onkeydown="if(event.key==='Enter')memoSearchRun()" style="width: 100%; height: 40px; border: 1px solid #FF9800; border-radius: 6px; padding: 0 72px 0 10px; font-size: 15px; box-sizing: border-box; background-color: #FFFFFF; color: #1A1A1A;"><button type="button" onclick="memoSearchRun()" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); height: 30px; min-width: 58px; padding: 0 10px; border: none; border-radius: 6px; background-color: #FF9800; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer;">확인</button></div>
       <div id="memoCardList" style="display: flex; flex-direction: column; gap: 15px; margin-top: 12px;"></div>
       <div id="memoSpacer" aria-hidden="true" style="height: 62px; flex-shrink: 0;"></div>
       <!-- 하단 고정 바: 닫기 -->
@@ -3359,8 +3359,14 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           const val = function (id) { const el = document.getElementById(id); return el ? el.value : 'all'; };
           const grp = val('cuGroupFilter'), kind = val('cuKindFilter'), ded = val('cuDeductFilter');
           const yr = val('cuYearFilter'), mo = val('cuMonthFilter');
+          const kwEl = document.getElementById('cuKeywordSearch');
+          const kw = String(kwEl ? kwEl.value : '').trim().toLowerCase();
           const cards = loadCardRegistry().filter(function (c) {
-            return (grp === 'all' || c.group === grp) && (kind === 'all' || c.kind === kind);
+            if (!((grp === 'all' || c.group === grp) && (kind === 'all' || c.kind === kind))) return false;
+            if (!kw) return true;
+            const own = [c.alias, c.subAlias, c.group, c.kind].map(function (v) { return String(v || '').toLowerCase(); }).join(' ');
+            if (own.indexOf(kw) >= 0) return true;
+            return loadCardUsageRecords().some(function (r) { return r.cardId === c.id && String(r.merchant || '').toLowerCase().indexOf(kw) >= 0; });
           });
           const ids = new Set(cards.map(function (c) { return c.id; }));
           const recs = loadCardUsageRecords().filter(function (r) {
@@ -3512,6 +3518,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
             if (el) el.onchange = function () { window.renderCardUsageView(); };
           });
           cuRenderMemo();
+          kwHighlight(box, (document.getElementById('cuKeywordSearch') || {}).value || '');
         };
         // ===== 시트(꿀단지_카드문자) → 미분류 문자 가져오기 =====
         const CARD_SMS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwqbNwd-mflrvkcV6OjXd9P9bGw4PUg4WrdowT15n_KobiMuTWoBFR8ECNSZCHnzKU3/exec';
@@ -4037,6 +4044,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
               '</div>' + cardHtml;
           }
           results.innerHTML = html;
+          kwHighlight(results, stockFilter.keyword);
           if (window.stockJustSaved) {
             var target = window.stockJustSaved;
             window.stockJustSaved = null;
@@ -4606,7 +4614,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
       <!-- 1행: 키워드 검색 | 그룹 전체 -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 6px; margin-top: 0;">
         <div style="position: relative; display: flex; align-items: center;">
-          <input type="text" placeholder="키워드 검색" style="width: 100%; padding: 10px 12px; padding-right: 50px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
+          <input type="text" id="cuKeywordSearch" placeholder="키워드 검색" oninput="renderCardUsageView()" style="width: 100%; padding: 10px 12px; padding-right: 50px; border: 1px solid #FF9800; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #FFFFFF; cursor: text; box-sizing: border-box;">
           <button type="button" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background-color: #FF8C00; color: white; border: none; border-radius: 3px; padding: 4px 6px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; z-index: 2;">확인</button>
         </div>
         <select id="cuGroupFilter" style="width: 100%; height: 40px; padding: 10px 12px; padding-right: 44px; border: 1px solid #00A8A8 !important; border-radius: 4px; font-size: 13px; font-weight: 400; color: var(--color-gray-dark); background-color: #E8F4F4; cursor: pointer; appearance: none; background-image: url(&#39;data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27%2300A8A8%27%3e%3cpolygon points=%2712,15 6,9 18,9%27%3e%3c/polygon%3e%3c/svg%3e&#39;); background-repeat: no-repeat; background-position: right 8px center; background-size: 30px; min-width: 0; outline: none; box-shadow: none;"><option value="all" selected="">그룹 전체</option><option value="본인">본인</option><option value="배우자">배우자</option></select>
@@ -9539,6 +9547,7 @@ function kyungRenderList() {
   box.innerHTML = notice + visible.map(function (x) { return kyungCardHTML(x.d, x.i); }).join('');
   // 화면에 보이는 첫 카드는 위 여백 0, 나머지는 20px
   box.querySelectorAll('.kyung-item').forEach(function (el, n) { el.style.setProperty('margin-top', n ? '20px' : '0px', 'important'); });
+  kwHighlight(box, k);
 }
 // 필수 입력 순서 (지역명·메모는 필수아님)
 const KYUNG_REQUIRED = ['기관분류', '은행명', '평가년월', '평가등급', '자산총계', '순자본비율', '순고정이하여신비율', '총자산순이익율', '유동성비율'];
@@ -11599,6 +11608,8 @@ function applyKeywordAndCategoryFilter() {
       visibleProductIds.add(key);
     }
   });
+
+  kwHighlight(document.getElementById('products-list-page'), keyword);
 
   // 필터링된 상품 목록
   const filteredProducts = allProducts.filter(p => {
@@ -24401,6 +24412,7 @@ function renderSchedulePageWithLocalStorage() {
   });
 
   scheduleContainer.innerHTML = allHTML;
+  kwHighlight(scheduleContainer, interestOverviewState.keyword);
 
   console.log('✅ 적금 현황 페이지 렌더링 완료:', {
     총가입금액: totalInvestment,
@@ -27916,6 +27928,11 @@ document.addEventListener('DOMContentLoaded', () => {
 <style>
 /* 메모관리: 조건·메모 입력칸은 입력한 줄 수만큼 자동으로 늘어남 */
 input[placeholder="키워드 검색"]:focus, input#memoKeywordSearch:focus, input#productKeywordSearchEval:focus { border-color: #00A8A8 !important; outline: none !important; }
+/* 메모관리 키워드 검색: 클릭(포커스) 시에도 청록 테두리 1px */
+input#memoKeywordSearch:focus, input#memoKeywordSearch:focus-visible { border: 1px solid #00A8A8 !important; box-shadow: none !important; outline: none !important; }
+/* 키워드 검색 강조: 일치하는 글자는 빨간 배경·흰 글자, 해당 카드(청록 테두리 안쪽)는 연한 빨간 배경 */
+mark.kw-hit { background-color: #FF0000 !important; color: #FFFFFF !important; border-radius: 3px; padding: 0 1px; }
+.kw-card-hit { background-color: #FFE5E5 !important; }
 #memoBodyInput { field-sizing: content; height: auto !important; min-height: 120px; overflow: hidden !important; }
 </style>
 <script>
@@ -28022,6 +28039,49 @@ function memoMigrate() {
 function kwLive(v) {
   return String(v == null ? '' : v);
 }
+// 키워드 검색 강조: 일치하는 글자는 빨간 배경·흰 글자, 해당 카드(청록 테두리 안쪽)는 연한 빨간 배경
+function kwHighlight(root, kw) {
+  if (!root) return;
+  root.querySelectorAll('mark.kw-hit').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+  root.normalize();
+  root.querySelectorAll('.kw-card-hit').forEach(function (c) { c.classList.remove('kw-card-hit'); });
+  const q = String(kw == null ? '' : kw).trim().toLowerCase();
+  if (!q) return;
+  const CARD_SEL = '.summary-card, .kyung-item, .stock-sub-card';
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const targets = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    const p = node.parentElement;
+    if (!p || !node.nodeValue || node.nodeValue.toLowerCase().indexOf(q) < 0) continue;
+    if (p.closest('input, textarea, select, button, script, style')) continue;
+    if (p.closest('[style*="display: none"], [style*="display:none"]')) continue;
+    if (!p.closest(CARD_SEL)) continue;
+    targets.push(node);
+  }
+  targets.forEach(function (t) {
+    const s = t.nodeValue;
+    const low = s.toLowerCase();
+    const frag = document.createDocumentFragment();
+    let i = 0, idx;
+    while ((idx = low.indexOf(q, i)) >= 0) {
+      if (idx > i) frag.appendChild(document.createTextNode(s.slice(i, idx)));
+      const mk = document.createElement('mark');
+      mk.className = 'kw-hit';
+      mk.textContent = s.substr(idx, q.length);
+      frag.appendChild(mk);
+      let box = t.parentNode;
+      while (box && box !== root) {
+        if (/border:\s*1px solid #00A8A8/.test(box.getAttribute('style') || '') || box.matches(CARD_SEL)) break;
+        box = box.parentElement;
+      }
+      if (box && box !== root) box.classList.add('kw-card-hit');
+      i = idx + q.length;
+    }
+    if (i < s.length) frag.appendChild(document.createTextNode(s.slice(i)));
+    t.parentNode.replaceChild(frag, t);
+  });
+}
 // 메모 검색: 입력과 동시에 필터
 function memoKeywordInput(v) {
   memoKeyword = kwLive(v);
@@ -28094,6 +28154,7 @@ function memoRenderAll() {
       + '</div>'
       + '</div>';
   }).join('');
+  kwHighlight(box, kw);
 }
 
 // 분류 추가 (사용자가 분류명을 직접 입력)
@@ -28132,8 +28193,8 @@ function memoOpenCatManage() {
       : '<button type="button" onclick="memoMoveCat(\'' + c.id + '\', 1)" style="background: #999; color: white; border: none; padding: 2px 3px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 10px; min-width: 18px; height: 24px; flex-shrink: 0;">↓</button>';
     return '<div style="display: flex; align-items: center; gap: 8px; padding: 8px 0;' + (i < MEMO_CATS.length - 1 ? ' border-bottom: 1px solid #E0E0E0;' : '') + '">'
       + '<span style="font-size: 14px; font-weight: 400; color: #000000; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + memoEsc(c.label) + '</span>'
-      + '<span style="font-size: 14px; font-weight: 400; color: #000000; white-space: nowrap;">' + n + '건</span>'
-      + '<span style="margin-left: auto; display: flex; gap: 6px;">'
+      + '<span style="margin-left: auto; margin-right: 2px; font-size: 13px; font-weight: 400; color: #888888; white-space: nowrap;">' + n + '건</span>'
+      + '<span style="display: flex; gap: 6px;">'
       + upBtn + downBtn
       + btn('#00A8A8', '#00A8A8', '수정', "memoOpenCatEdit('" + c.id + "')")
       + btn('#FF0000', '#FF0000', '삭제', "memoConfirmCatDelete('" + c.id + "')")
@@ -28229,8 +28290,8 @@ function memoReadForm() {
 
 function memoOpenAdd() {
   const cat = (memoFilterCat !== 'all' && MEMO_CATS.some(c => c.id === memoFilterCat)) ? memoFilterCat : (MEMO_CATS[0] ? MEMO_CATS[0].id : 'etc');
-  const footer = '<button type="button" class="honeypot-button-cancel" style="' + MEMO_BTN_STYLE + '" onclick="cfCancelModal()">취소</button>'
-    + '<button type="button" class="honeypot-button-save" style="' + MEMO_BTN_STYLE + '" onclick="memoSaveNew()">저장</button>';
+  const footer = '<button type="button" class="honeypot-button-save" style="' + MEMO_BTN_STYLE + '" onclick="memoSaveNew()">저장</button>'
+    + '<button type="button" class="honeypot-button-cancel" style="' + MEMO_BTN_STYLE + '" onclick="cfCancelModal()">취소</button>';
   cfOpenModal('메모추가', memoFormHtml(cat, '', ''), footer, '#00A8A8');
 }
 function memoSaveNew() {
