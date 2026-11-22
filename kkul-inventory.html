@@ -3365,8 +3365,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
             if (!((grp === 'all' || c.group === grp) && (kind === 'all' || c.kind === kind))) return false;
             if (!kw) return true;
             const own = [c.alias, c.subAlias, c.group, c.kind].map(function (v) { return String(v || '').toLowerCase(); }).join(' ');
-            if (own.indexOf(kw) >= 0) return true;
-            return loadCardUsageRecords().some(function (r) { return r.cardId === c.id && String(r.merchant || '').toLowerCase().indexOf(kw) >= 0; });
+            return own.indexOf(kw) >= 0;
           });
           const ids = new Set(cards.map(function (c) { return c.id; }));
           const recs = loadCardUsageRecords().filter(function (r) {
@@ -5715,8 +5714,8 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
 
         <!-- 카드 1: 파킹금리 (중첩카드 없이 버튼과 표, 금리조견표와 같은 형식) -->
         <div class="summary-card" style="margin: 0 !important; padding: 15px 10px 15px 10px !important; overflow: hidden; background-color: #FFFFFF; box-shadow: var(--shadow-card);">
-          <div style="margin-bottom: 0;"><div class="summary-card" style="margin: 0 !important; padding: 0 14px !important; box-sizing: border-box; height: 40px; border: 1px solid #00A8A8 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #000000; cursor: pointer;" onclick="kyungOpenAdd()">경영평가등급추가</div></div>
-          <div style="margin: 20px 0 0 0;">
+          <div style="margin-bottom: 0;"><div class="summary-card" style="margin: 0 !important; padding: 0 14px !important; box-sizing: border-box; height: 40px; border: 1px solid #00A8A8 !important; background-color: #FFFFFF !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #FF0000; border-radius: 6px !important; cursor: pointer;" onclick="kyungOpenAdd()">경영평가등급추가</div></div>
+          <div style="margin: 6px 0 0 0;">
       <!-- 4. 그룹 필터 + 이율 필터 (2열 배치) -->
       <!-- 🔧 [FIX] min-width: 0; max-width: 100%; 추가로 필터 필드 너비 고정 (체크박스 클릭 시 확장 방지) -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 6px; min-width: 0; max-width: 100%;">
@@ -24243,6 +24242,7 @@ function renderProductsList() {
 
   console.log('%c✅ container.innerHTML에 HTML 할당 시작 - HTML 길이:', 'color: #00AA00; font-weight: bold;', html.length);
   container.innerHTML = html;
+  kwHighlight(container, (document.getElementById('productKeywordSearch') || {}).value || '');
   console.log('%c✅ container.innerHTML 할당 완료!', 'color: #00AA00; font-weight: bold; font-size: 13px;');
 
   // 적금목록 페이지의 필터 요소에 이벤트 리스너 등록
@@ -28072,7 +28072,7 @@ function kwHighlight(root, kw) {
       frag.appendChild(mk);
       let box = t.parentNode;
       while (box && box !== root) {
-        if (/border:\s*1px solid #00A8A8/.test(box.getAttribute('style') || '') || box.matches(CARD_SEL)) break;
+        if (/border:\s*1px solid/.test(box.getAttribute('style') || '') || box.matches(CARD_SEL)) break;
         box = box.parentElement;
       }
       if (box && box !== root) box.classList.add('kw-card-hit');
