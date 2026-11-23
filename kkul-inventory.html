@@ -1158,6 +1158,13 @@ input[type="date"]:read-only {
   cursor: pointer;
 }
 
+/* 주식 등록·수정 페이지 날짜 칸: 달력 아이콘을 작게 하고 오른쪽 끝으로 당겨 날짜가 가려지지 않게 함 */
+#stock-registration-page input[type="date"].add-product-input {
+  background-position: right 4px center;
+  background-size: 16px 16px;
+  padding-right: 26px !important;
+}
+
 /* 상품 등록 페이지의 입력 필드 높이 50px */
 #add-product-page .form-input, #stock-registration-page .form-input,
 #add-product-page .form-select, #stock-registration-page .form-select,
@@ -4114,7 +4121,10 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
         <!-- 체결일 / 배당일자 (배당 선택 시 라벨 변경) -->
         <div class="add-product-field" id="stockTradeDateField" style="display: flex;">
           <label class="add-product-label" id="stockTradeDateLabel">체결일자</label>
-          <input type="date" class="add-product-input" id="stockTradeDate" data-filled="true">
+          <div style="position: relative;">
+            <div id="stockTradeDateText" aria-hidden="true" style="position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 40px; box-sizing: border-box; padding: 5px 26px 5px 7px; display: flex; align-items: center; font-size: 14px; color: #1A1A1A; white-space: nowrap; pointer-events: none;"></div>
+            <input type="date" class="add-product-input" id="stockTradeDate" data-filled="true" style="color: transparent;" oninput="stSyncTradeDateText()" onchange="stSyncTradeDateText()">
+          </div>
         </div>
 
         <!-- 체결가격 (배당 선택 시 숨김) -->
@@ -4179,6 +4189,13 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
             var v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
             var el = document.getElementById('stockTradeDate');
             if (el && !el.value) el.value = v;
+            window.stSyncTradeDateText = function () {
+              var i = document.getElementById('stockTradeDate'), t = document.getElementById('stockTradeDateText');
+              if (!i || !t) return;
+              var m = (i.value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+              t.textContent = m ? m[1] + '. ' + m[2] + '. ' + m[3] + '.' : '';
+            };
+            window.stSyncTradeDateText();
           })();
         </script>
 
@@ -4223,6 +4240,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           }
 
           function updateStockPreview() {
+            if (window.stSyncTradeDateText) window.stSyncTradeDateText();
             var box = document.getElementById('stockPreviewBox');
             if (!box) return;
             var f = readStockRegForm();
@@ -5870,9 +5888,9 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
   position: relative;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300A8A8' stroke-width='2'%3e%3crect x='3' y='5' width='18' height='16' rx='2'/%3e%3cpath d='M3 10h18M8 3v4M16 3v4'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 26px 26px;
-  padding-right: 46px;
+  background-position: right 4px center;
+  background-size: 16px 16px;
+  padding-right: 26px;
   background-color: #E8F4F4;
 }
 .cf-month-field::-webkit-calendar-picker-indicator {
@@ -28394,5 +28412,40 @@ function memoConfirmDelete(id) {
 })();
 // 화면 준비가 끝난 뒤 한 번 옮김 (메뉴 화면을 열기 전에도 기존 메모가 보존되도록)
 try { memoMigrate(); } catch (e) { }
+</script>
+<script>
+// 하단 고정바 버튼 순서 통일: 삭제(맨 왼쪽) → 저장·추가·수정 등(가운데) → 닫기·취소(맨 오른쪽)
+(function () {
+  var busy = false, scheduled = false;
+  function rank(btn) {
+    var t = (btn.textContent || '').replace(/\s+/g, '');
+    if (btn.classList.contains('honeypot-button-delete') || t === '삭제') return 0;
+    if (t === '닫기' || t === '취소') return 2;
+    return 1;
+  }
+  function fixFooters() {
+    scheduled = false;
+    if (busy) return;
+    busy = true;
+    try {
+      document.querySelectorAll('[style*="position: fixed; bottom: 0"], [style*="position:fixed;bottom:0"]').forEach(function (bar) {
+        var btns = Array.prototype.filter.call(bar.children, function (c) { return c.tagName === 'BUTTON'; });
+        if (btns.length < 2) return;
+        var sorted = btns.map(function (b, i) { return { b: b, r: rank(b), i: i }; })
+          .sort(function (x, y) { return (x.r - y.r) || (x.i - y.i); })
+          .map(function (o) { return o.b; });
+        var same = sorted.every(function (b, i) { return b === btns[i]; });
+        if (!same) sorted.forEach(function (b) { bar.appendChild(b); });
+      });
+    } finally { busy = false; }
+  }
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(fixFooters);
+  }
+  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+  schedule();
+})();
 </script>
 </body></html>
