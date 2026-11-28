@@ -15596,12 +15596,18 @@ function renderCalcEditPopup() {
   const maturityObj = addMonths(baseStart, schedule.length);
   const maturityStr = formatDate(maturityObj);
   const totalDaysDiff = schedule.reduce((sum, item) => sum + (item.daysDiff || 0), 0);
+  // 조정 후 만기일: 아래 선납이연 요약의 이연만기일과 동일한 규칙 (원만기 + 이연일수, 마지막 납입 다음 날과 비교)
+  const _mDeferDays = totalDaysDiff > 0 ? Math.ceil(totalDaysDiff / Math.max(1, schedule.length)) : 0;
+  const _mShift = new Date(maturityObj.getFullYear(), maturityObj.getMonth(), maturityObj.getDate() + _mDeferDays);
+  const _mLast = parseDate(schedule[schedule.length - 1].paymentDate);
+  const _mAfter = new Date(_mLast.getFullYear(), _mLast.getMonth(), _mLast.getDate() + 1);
+  const adjustedMaturityStr = formatDate(_mAfter > _mShift ? _mAfter : _mShift);
   rowsHTML += `
       <tr style="border-bottom: 1px solid #E0E0E0; background-color: #F5F5F5; height: 44px;">
         <td style="padding: 0; border-right: 1px solid #E0E0E0;"></td>
         <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 13px;">만기일</td>
         <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 13px; font-weight: 700;">${maturityStr}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 13px; font-weight: 700;">${maturityStr}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 13px; font-weight: 700;">${adjustedMaturityStr}</td>
         <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-size: 13px; font-weight: 700;">${totalDaysDiff}</td>
       </tr>`;
 
