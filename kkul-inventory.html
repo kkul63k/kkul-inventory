@@ -23012,7 +23012,7 @@ function buildPrepayTableHTML(product, opts = {}) {
           <td style="${cellStyle} font-weight: 700; color: ${r.color}; text-align: center;">납입<br>${PREPAY_TABLE_ROWS.indexOf(r) + 1}</td>
           <td class="prepay-date" style="${cellStyle} color: ${r.color}; white-space: nowrap; text-align: left;">${String(date).replace(/\./g, '-')}</td>
           <td class="prepay-count" style="${cellStyle} color: ${r.color}; white-space: nowrap; text-align: right;">${zeroRow ? '' : formatPrepayCount(d.count)}</td>
-          <td class="amt" style="${cellStyle} padding-right: ${C ? '5px' : '2px'}; color: ${r.color}; white-space: nowrap; text-align: right${r.key === '납입2' ? ' !important' : ''}; font-size: 13px;">${zeroRow ? '' : formatPrepayAmount(d.amount)}</td>
+          <td class="amt" style="${cellStyle} padding-right: ${C ? '5px' : '5px'}; color: ${r.color}; white-space: nowrap; text-align: right${r.key === '납입2' ? ' !important' : ''}; font-size: 13px;">${zeroRow ? '' : formatPrepayAmount(d.amount)}</td>
         </tr>`;
     }).join('');
   return `
