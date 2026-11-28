@@ -14040,7 +14040,7 @@ function fitCalcResultCards() {
     const el = document.getElementById(id);
     if (!el || !el.parentElement) return;
     const pl = el.parentElement.getBoundingClientRect().left;
-    el.style.width = (vw - 16) + 'px';
+    el.style.width = (vw - 16 - 30) + 'px';
     el.style.marginLeft = (8 - pl) + 'px';
     el.style.marginRight = '0px';
   });
@@ -14190,13 +14190,19 @@ function renderPrepayScheduleTable(schedule) {
 
     // ★ FIX: 만기일의 일수차이 = 1~termMonths회차의 일수차이 합계
     const maturityDaysDiff = schedule.reduce((sum, item) => sum + item.daysDiff, 0);
+    // 조정 후 만기일: 수정 페이지(일정 조정 표)와 동일한 규칙
+    const _cDefer = maturityDaysDiff > 0 ? Math.ceil(maturityDaysDiff / Math.max(1, schedule.length)) : 0;
+    const _cShift = new Date(maturityDate.getFullYear(), maturityDate.getMonth(), maturityDate.getDate() + _cDefer);
+    const _cLast = parseDate(schedule[schedule.length - 1].paymentDate);
+    const _cAfter = new Date(_cLast.getFullYear(), _cLast.getMonth(), _cLast.getDate() + 1);
+    const adjustedMaturityStr = formatDate(_cAfter > _cShift ? _cAfter : _cShift);
 
     html += `
       <tr style="border-bottom: 1px solid #E0E0E0; background-color: #F5F5F5; height: 44px;">
         ${isEditing ? '<td style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0;"></td>' : ''}
         <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 14px;">만기일</td>
         <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${adjustedMaturityStr}</td>
         <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-weight: 700; font-size: 14px; width: 40px;">${maturityDaysDiff}</td>
       </tr>
     `;
@@ -15463,6 +15469,8 @@ function cancelCalcEdit(btn) {
 
 // 하단 적용: 수정 내용을 반영하고 닫은 뒤 적용 메시지를 누른 버튼 위에 띄웁니다.
 function applyCalcEdit(btn) {
+  // 수정 내용을 계산하기 아래 일정표에도 반영
+  if (window.prepaySchedule) renderPrepayScheduleTable(window.prepaySchedule);
   // 버튼이 숨겨지기 전에 메시지 위치를 잡아야 버튼 바로 위에 뜹니다.
   showNotification('✓ 저장되었습니다', 2000, 'apply', btn);
   closeCalcEditPopup();
@@ -15675,7 +15683,7 @@ function renderCalcEditPopup() {
   rowsHTML += `
       <tr style="border-bottom: 1px solid #E0E0E0; background-color: #F5F5F5; height: 44px;">
         <td style="padding: 0; border-right: 1px solid #E0E0E0;"></td>
-        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 14px;">만기일</td>
+        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 14px; line-height: 1.1;">만기<br>일</td>
         <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 14px; font-weight: 700;">${maturityStr}</td>
         <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 14px; font-weight: 700;">${adjustedMaturityStr}</td>
         <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-size: 14px; font-weight: 700;">${totalDaysDiff}</td>
@@ -15686,10 +15694,10 @@ function renderCalcEditPopup() {
       <table style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed;">
         <thead>
           <tr style="background-color: #F5F5F5; border-bottom: 2px solid #D4D4D4;">
-            <th style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0; width: 6.71%;">
+            <th style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0; width: 7.81%;">
               <input type="checkbox" id="calc_edit_check_all" ${allChecked ? 'checked' : ''} onchange="calcEditToggleAll(this.checked)" style="cursor: pointer; width: 16px; height: 16px; margin: 0; display: block; margin-left: auto; margin-right: auto;">
             </th>
-            <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; width: calc(13.9% + 5px); white-space: nowrap;">회차</th>
+            <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; width: 12.8%; white-space: nowrap;">회차</th>
             <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 31.46%;">기준일자</th>
             <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 31.46%;">실제납입일</th>
             <th style="padding: 6px 0; text-align: center; font-weight: 600; font-size: 14px; line-height: 1.2; width: calc(16.47% - 5px);">선납<br>이연</th>
