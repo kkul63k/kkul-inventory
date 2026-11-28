@@ -14047,7 +14047,7 @@ function fitCalcResultCards() {
 }
 window.addEventListener('resize', fitCalcResultCards);
 // 일정표 '회차' 칸: NNN회처럼 글자가 칸보다 넓으면 줄바꿈 없이 글자 크기를 자동으로 줄임 (최소 7px)
-function fitScheduleRoundCol(table) {
+function fitScheduleRoundCol(table, base = 13) {
   if (!table) return;
   const idx = Array.from(table.querySelectorAll('thead th')).findIndex(th => th.textContent.replace(/\s/g, '').includes('회차'));
   if (idx < 0) return;
@@ -14055,9 +14055,9 @@ function fitScheduleRoundCol(table) {
     const td = tr.children[idx];
     if (!td) return;
     td.style.setProperty('white-space', 'nowrap', 'important');
-    let fs = 13;
+    let fs = base;
     td.style.setProperty('font-size', fs + 'px', 'important');
-    // 만기 글자는 크기 13px 고정 (NN회는 13px에서 넘칠 때만 자동 축소)
+    // 만기 글자는 기준 크기 고정 (NN회는 기준 크기에서 넘칠 때만 자동 축소)
     if (td.textContent.includes('만기')) return;
     const over = () => { const rg = document.createRange(); rg.selectNodeContents(td); return rg.getBoundingClientRect().width > td.clientWidth + 0.5; };
     while (over() && fs > 7) {
@@ -14071,10 +14071,10 @@ function fitCalcScheduleLastCol() {
   const c = document.getElementById('prepayScheduleContainer');
   const table = c && c.querySelector('table');
   if (!table) return;
-  fitScheduleRoundCol(table);
+  fitScheduleRoundCol(table, 14);
   table.querySelectorAll('tbody tr > td:last-child').forEach(td => {
     td.style.setProperty('white-space', 'nowrap', 'important');
-    let fs = 13;
+    let fs = 14;
     td.style.setProperty('font-size', fs + 'px', 'important');
     while (td.scrollWidth > td.clientWidth + 0.5 && fs > 7) {
       fs -= 0.5;
@@ -14114,7 +14114,7 @@ function renderPrepayScheduleTable(schedule) {
         <div style="font-size: 14px; font-weight: 600; color: #000000;">📅 선납이연일정표</div>
       </div>
       <div style="overflow-x: auto; border: 1px solid #E0E0E0; border-radius: 8px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed;">
           <thead>
             <tr style="background-color: #F5F5F5; border-bottom: 2px solid #D4D4D4;">
               ${isEditing ? `<th style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; width: 24px; line-height: 1.3;">
@@ -14124,10 +14124,10 @@ function renderPrepayScheduleTable(schedule) {
                        onchange="togglePrepayAll(this.checked)"
                        style="cursor: pointer; width: 19px; height: 19px; margin: 0; display: block; margin-left: auto; margin-right: auto;">
               </th>` : ''}
-              <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; line-height: 1.3; width: calc(13.9% + 5px);">회차</th>
-              <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; line-height: 1.2; width: 32.7%;">기준일자</th>
-              <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; line-height: 1.2; width: 32.7%;">실제<br>납입일자</th>
-              <th style="padding: 6px 0; text-align: center; font-weight: 600; font-size: 13px; line-height: 1.2; width: calc(20.7% - 5px);">선납<br>이연</th>
+              <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.3; width: calc(13.9% + 5px);">회차</th>
+              <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 32.7%;">기준일자</th>
+              <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 32.7%;">실제<br>납입일자</th>
+              <th style="padding: 6px 0; text-align: center; font-weight: 600; font-size: 14px; line-height: 1.2; width: calc(20.7% - 5px);">선납<br>이연</th>
             </tr>
           </thead>
           <tbody>
@@ -14173,10 +14173,10 @@ function renderPrepayScheduleTable(schedule) {
                  onchange="togglePrepayRow(${index})"
                  style="cursor: pointer; width: 18px; height: 18px; margin: 0; display: block; margin-left: auto; margin-right: auto;">
         </td>` : ''}
-        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 400; color: ${statusColor}; font-size: 12px;">${item.month}회</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #000000; font-size: 13px; word-break: break-word; width: 80px;">${item.baseDate}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 13px; font-weight: 700; word-break: break-word; width: 80px;">${item.paymentDate}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 13px; font-weight: 500; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; word-break: break-word; width: 40px;">${statusText}</td>
+        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 400; color: ${statusColor}; font-size: 14px;">${item.month}회</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #000000; font-size: 14px; word-break: break-word; width: 80px;">${item.baseDate}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${item.paymentDate}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 14px; font-weight: 500; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; word-break: break-word; width: 40px;">${statusText}</td>
       </tr>
     `;
   });
@@ -14194,10 +14194,10 @@ function renderPrepayScheduleTable(schedule) {
     html += `
       <tr style="border-bottom: 1px solid #E0E0E0; background-color: #F5F5F5; height: 44px;">
         ${isEditing ? '<td style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0;"></td>' : ''}
-        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 13px;">만기일</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 13px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 13px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
-        <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-weight: 700; font-size: 13px; width: 40px;">${maturityDaysDiff}</td>
+        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 14px;">만기일</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 14px; font-weight: 700; word-break: break-word; width: 80px;">${maturityDateStr}</td>
+        <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-weight: 700; font-size: 14px; width: 40px;">${maturityDaysDiff}</td>
       </tr>
     `;
   }
@@ -15604,12 +15604,14 @@ function calcEditSetDate(index, value) {
 function fitPopupScheduleLastCol() {
   const table = Array.from(document.querySelectorAll('#calcEditContent table')).find(t => t.querySelectorAll('thead th').length === 5);
   if (!table) return;
-  fitScheduleRoundCol(table);
+  fitScheduleRoundCol(table, 14);
   table.querySelectorAll('tbody tr > td:last-child').forEach(td => {
+    // 만기 행은 제외 (글자 크기 14 유지)
+    if (td.closest('tr').textContent.includes('만기')) return;
     td.style.setProperty('white-space', 'nowrap', 'important');
-    let fs = parseFloat(getComputedStyle(td).fontSize) || 12;
-    const base = fs;
-    td.style.setProperty('font-size', base + 'px', 'important');
+    // 기준 14px (더 크게는 안 함), 칸을 넘칠 때만 14px보다 작게 자동 축소
+    let fs = 14;
+    td.style.setProperty('font-size', fs + 'px', 'important');
     while (td.scrollWidth > td.clientWidth + 0.5 && fs > 7) {
       fs -= 0.5;
       td.style.setProperty('font-size', fs + 'px', 'important');
@@ -15652,10 +15654,10 @@ function renderCalcEditPopup() {
         <td style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0;">
           <input type="checkbox" ${item.isChecked ? 'checked' : ''} onchange="calcEditToggleRow(${index})" style="cursor: pointer; width: 16px; height: 16px; margin: 0; display: block; margin-left: auto; margin-right: auto;">
         </td>
-        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 400; color: ${statusColor}; font-size: 12px; white-space: nowrap;">${item.month}회</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #000000; font-size: 13px; white-space: nowrap;">${item.baseDate}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 13px; font-weight: 700; white-space: nowrap;">${item.paymentDate}</td>
-        <td style="padding: 6px 0; text-align: center; color: ${statusColor}; font-size: 12px; font-weight: 500; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;">${statusText}</td>
+        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 400; color: ${statusColor}; font-size: 14px; white-space: nowrap;">${item.month}회</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #000000; font-size: 14px; white-space: nowrap;">${item.baseDate}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: ${statusColor}; font-size: 14px; font-weight: 700; white-space: nowrap;">${item.paymentDate}</td>
+        <td style="padding: 6px 0; text-align: center; color: ${statusColor}; font-size: 14px; font-weight: 500; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;">${statusText}</td>
       </tr>`;
   });
 
@@ -15673,24 +15675,24 @@ function renderCalcEditPopup() {
   rowsHTML += `
       <tr style="border-bottom: 1px solid #E0E0E0; background-color: #F5F5F5; height: 44px;">
         <td style="padding: 0; border-right: 1px solid #E0E0E0;"></td>
-        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 13px;">만기일</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 13px; font-weight: 700;">${maturityStr}</td>
-        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 13px; font-weight: 700;">${adjustedMaturityStr}</td>
-        <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-size: 13px; font-weight: 700;">${totalDaysDiff}</td>
+        <td style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 700; color: #E74C3C; font-size: 14px;">만기일</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #E74C3C; font-size: 14px; font-weight: 700;">${maturityStr}</td>
+        <td style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; color: #FF00FF; font-size: 14px; font-weight: 700;">${adjustedMaturityStr}</td>
+        <td style="padding: 6px 0; text-align: center; color: #FF00FF; font-size: 14px; font-weight: 700;">${totalDaysDiff}</td>
       </tr>`;
 
   const scheduleHTML = `
     <div style="overflow-x: auto; margin: 16px -7px 0 -7px; border: 1px solid #E0E0E0; border-radius: 8px;">
-      <table style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed;">
         <thead>
           <tr style="background-color: #F5F5F5; border-bottom: 2px solid #D4D4D4;">
             <th style="padding: 0; text-align: center; border-right: 1px solid #E0E0E0; width: 6.71%;">
               <input type="checkbox" id="calc_edit_check_all" ${allChecked ? 'checked' : ''} onchange="calcEditToggleAll(this.checked)" style="cursor: pointer; width: 16px; height: 16px; margin: 0; display: block; margin-left: auto; margin-right: auto;">
             </th>
-            <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; width: calc(13.9% + 5px); white-space: nowrap;">회차</th>
-            <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; line-height: 1.2; width: 31.46%;">기준일자</th>
-            <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 13px; line-height: 1.2; width: 31.46%;">실제납입일</th>
-            <th style="padding: 6px 0; text-align: center; font-weight: 600; font-size: 13px; line-height: 1.2; width: calc(16.47% - 5px);">선납<br>이연</th>
+            <th style="padding: 4px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; width: calc(13.9% + 5px); white-space: nowrap;">회차</th>
+            <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 31.46%;">기준일자</th>
+            <th style="padding: 6px 0; text-align: center; border-right: 1px solid #E0E0E0; font-weight: 600; font-size: 14px; line-height: 1.2; width: 31.46%;">실제납입일</th>
+            <th style="padding: 6px 0; text-align: center; font-weight: 600; font-size: 14px; line-height: 1.2; width: calc(16.47% - 5px);">선납<br>이연</th>
           </tr>
         </thead>
         <tbody>${rowsHTML}
