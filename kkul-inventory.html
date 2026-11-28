@@ -3308,13 +3308,14 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
         function cardRowsHTML(rows) {
           return rows.map(function (r, i) {
             const last = i === rows.length - 1;
+            const rc = r.red ? '#FF0000' : r.teal ? '#00A8A8' : '#000000';
             const lastTier = last && r.tightTop;
             const pad = r.tight ? '5px 0 0' : lastTier ? '0' : r.tightTop ? '0 0 5px' : '8px 0';
             const mt = (r.tightTop ? 'margin-top:-3px;' : '') + (lastTier ? 'margin-bottom:-4px;' : '');
             const border = (!last && r.b !== false) ? 'border-bottom:1px solid #E0E0E0;' : '';
             return '<div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:' + pad + ';' + mt + border + '">' +
-              '<span style="font-size:14px; font-weight:400; color:#000000;">' + r.l + '</span>' +
-              '<span style="font-size:14px; font-weight:700; color:#000000;">' + r.v + '</span></div>';
+              '<span style="font-size:14px; font-weight:' + ((r.red || r.teal) ? 700 : 400) + '; color:' + rc + ';">' + r.l + '</span>' +
+              '<span style="font-size:14px; font-weight:700; color:' + rc + ';">' + r.v + '</span></div>';
           }).join('');
         }
         // 통신요금 내역 판별: 가맹점명(또는 문구)에 '통신요금'이 들어가면 할인제외 기본값
@@ -3398,9 +3399,14 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
         }
         function cardSummaryCardHTML(badge, rows, mt, suffix) {
           return '<div class="summary-card" style="margin-top:' + mt + ' !important; margin-bottom:0 !important;">' +
-            '<div style="display:flex; justify-content:flex-start; align-items:center; gap:8px;"><div style="display:flex; align-items:center; gap:6px;">' + badge + '</div>' + (suffix ? '<div style="display:flex; align-items:center; gap:2px;"><div style="font-size:17px; font-weight:600; color:#00A8A8;">카드사용요약</div><div style="font-size:15px; font-weight:600; color:#FF9800;">' + suffix + '</div></div>' : '<div style="font-size:17px; font-weight:600; color:#00A8A8;">카드사용요약</div>') + '</div>' +
+            (suffix
+              ? '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><div style="display:flex; align-items:center; gap:8px; min-width:0;"><div style="display:flex; align-items:center; gap:6px;">' + badge + '</div><div style="font-size:17px; font-weight:600; color:#00A8A8; white-space:nowrap;">카드사용요약</div></div>' +
+                '<div style="font-size:12px; font-weight:600; color:#FF9800; text-align:right; white-space:nowrap; flex-shrink:0;">' + suffix + '</div></div>'
+              : '<div style="display:flex; justify-content:flex-start; align-items:center; gap:8px;"><div style="display:flex; align-items:center; gap:6px;">' + badge + '</div><div style="font-size:17px; font-weight:600; color:#00A8A8;">카드사용요약</div></div>') +
             '<div class="stock-sub-card" style="background-color:#F5F5F5; border:1px solid #E0E0E0; border-radius:12px; box-shadow:none; padding:4px 12px 8px; margin-top:12px;">' + cardRowsHTML(rows).replace(/padding:8px 0;/g, 'padding:3.875px 0;').replace(/padding:6\.75px 0;/g, 'padding:3.875px 0;') + '</div></div>';
         }
+        // 총괄·그룹·메인 요약 카드의 '총사용금액' 행만 빨간색
+        function cardTotalRed(rows, withTeal) { return rows.map(function (r) { if (r.l === '총사용금액') return Object.assign({}, r, { red: true }); if (withTeal && r.l === '등록카드') return Object.assign({}, r, { teal: true }); return r; }); }
         function cardSubCardHTML(rows) {
           return '<div class="stock-sub-card" style="background-color:#F5F5F5; border:1px solid #E0E0E0; border-radius:12px; box-shadow:none; padding:4px 12px 8px; margin-top:12px;">' +
             cardRowsHTML(rows).replace(/padding:8px 0;/g, 'padding:3.875px 0;').replace(/padding:6\.75px 0;/g, 'padding:3.875px 0;') + '</div>';
@@ -3416,10 +3422,10 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
         function cardEntryHTML(c, recs) {
           const mine = (recs || []).filter(function (r) { return r.cardId === c.id; });
           return '<div class="summary-card" data-card-id="' + c.id + '" onclick="openCardDetail(\'' + c.id + '\')" style="margin-top:20px !important; margin-bottom:0 !important; cursor:pointer;' + (c.deleted ? 'background-color:#E8E8E8; opacity:0.45;' : '') + '">' +
-            '<div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;"><div style="display:flex; justify-content:flex-start; align-items:center; gap:6px;">' + (c.group ? '<span class="badge group-badge" data-group="' + c.group + '">' + c.group + '</span>' : '') + '</div><div style="font-size:15px; font-weight:700; color:#FF0000; text-align:center; white-space:nowrap;">' + c.alias + '</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">' + (c.kind === '신용' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#FF00FF; color:#FFFFFF;">신용</span>' : '') + (c.kind === '체크' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#007BFF; color:#FFFFFF;">체크</span>' : '') + '</div></div>' +
+            '<div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;"><div style="display:flex; justify-content:flex-start; align-items:center; gap:6px;">' + (c.group ? '<span class="badge group-badge" data-group="' + c.group + '">' + c.group + '</span>' : '') + '</div><div style="font-size:15px; font-weight:700; color:#00A8A8; text-align:center; white-space:nowrap;">' + c.alias + '</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">' + (c.kind === '신용' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#FF00FF; color:#FFFFFF;">신용</span>' : '') + (c.kind === '체크' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#007BFF; color:#FFFFFF;">체크</span>' : '') + '</div></div>' +
             cardSubAliasHTML(c) +
             '<div style="font-size:15px; font-weight:700; color:#FF0000; text-align:right; white-space:nowrap; margin-top:-6.6px; margin-bottom:-7.8px;">미확인 (' + loadCardUsageRecords().filter(function (r) { return r.cardId === c.id && r.confirmed !== true; }).length + '건)</div>' +
-            cardSubCardHTML(cardSummaryRows([c], mine, [c], !!c.discountTarget).filter(function (r) { return r.l !== '등록카드'; })) +
+            cardSubCardHTML(cardTotalRed(cardSummaryRows([c], mine, [c], !!c.discountTarget)).filter(function (r) { return r.l !== '등록카드'; })) +
             '</div>';
         }
         function refreshCardUsageFilterOptions() {
@@ -3512,7 +3518,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           const cards = all.filter(c => !c.deleted || showDeleted);
           // 청구할인 대상 카드가 하나라도 등록되어 있으면 총괄·그룹별에 청구할인 두 줄 표시
           const hasDisc = all.some(c => c.discountTarget);
-          let html = cardSummaryCardHTML('<span class="badge group-badge" style="background-color:#450909; color:#FFFFFF;">총괄</span>', cardSummaryRows(all, recs, all, hasDisc), '20px');
+          let html = cardSummaryCardHTML('<span class="badge group-badge" style="background-color:#450909; color:#FFFFFF;">총괄</span>', cardTotalRed(cardSummaryRows(all, recs, all, hasDisc), true), '20px');
           const groups = [];
           all.forEach(c => { if (c.group && groups.indexOf(c.group) === -1) groups.push(c.group); });
           // 고정 순서: 본인 → 배우자 → 그 외(추가 등록 순서 유지)
@@ -3521,7 +3527,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           groups.forEach(g => {
             const gc = all.filter(c => c.group === g);
             const gids = new Set(gc.map(c => c.id));
-            html += cardSummaryCardHTML('<span class="badge group-badge" data-group="' + g + '">' + g + '</span>', cardSummaryRows(gc, recs.filter(r => gids.has(r.cardId)), gc, hasDisc), '20px');
+            html += cardSummaryCardHTML('<span class="badge group-badge" data-group="' + g + '">' + g + '</span>', cardTotalRed(cardSummaryRows(gc, recs.filter(r => gids.has(r.cardId)), gc, hasDisc), true), '20px');
           });
           html += unclassifiedSectionHTML();
           if (cards.length > 0) {
@@ -3641,7 +3647,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           const cards = loadCardRegistry();
           const yr = String(new Date().getFullYear());
           const recs = loadCardUsageRecords().filter(r => cards.some(c => c.id === r.cardId) && String(r.date || '').slice(0, 4) === yr);
-          slot.innerHTML = cardSummaryCardHTML('<span class="badge group-badge" style="background-color:#450909; color:#FFFFFF;">총괄</span>', cardSummaryRows(cards, recs), '0px', '(' + new Date().getFullYear() + '년도)');
+          slot.innerHTML = cardSummaryCardHTML('<span class="badge group-badge" style="background-color:#450909; color:#FFFFFF;">총괄</span>', cardTotalRed(cardSummaryRows(cards, recs), true), '0px', '(' + new Date().getFullYear() + '년도)');
         };
         window.openCardDetail = function (id) {
           window.cardDetailId = id;
@@ -3857,7 +3863,7 @@ input#dxTx1, input#dxTx2, input#sxTx1, input#sxTx2 { border-radius: 4px !importa
           box.innerHTML = '<div style="margin-top:0; margin-bottom:3px; display:flex; align-items:center; gap:8px;"><span style="font-size:17px; font-weight:700; color:#000000;">카드정보</span></div>' +
             '<div style="display: flex; align-items: flex-start; font-size: 13px; font-weight: 400; color: #FF0000; padding: 0; line-height: 1.2; margin-top: 10px; margin-bottom: -5px;"><span style="flex-shrink: 0; width: 22px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; vertical-align:-2px; margin-right:5px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a10 10 0 0 1 0 14"></path></svg></span><div>아래의 카드를 선택하면, 카드를 수정/삭제<br>할 수 있습니다.<br>삭제된 카드는 숨김처리 되고, 사용내역은<br>통계에 사용될 수 있게 유지됩니다.<br>만약, 카드와 사용내역의 완전 삭제를 원하면 삭제된 카드를 선택하여 영구삭제 하세요.</div></div>' +
             '<div class="summary-card" style="margin-top:15px !important; margin-bottom:0 !important;' + (c.deleted ? ' background-color:#E8E8E8; opacity:0.45;' : '') + '">' +
-            '<div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;"><div style="display:flex; justify-content:flex-start; align-items:center; gap:6px;">' + (c.group ? '<span class="badge group-badge" data-group="' + c.group + '">' + c.group + '</span>' : '') + '</div><div style="font-size:15px; font-weight:700; color:#FF0000; text-align:center; white-space:nowrap;">' + c.alias + '</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">' + (c.kind === '신용' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#FF00FF; color:#FFFFFF;">신용</span>' : '') + (c.kind === '체크' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#007BFF; color:#FFFFFF;">체크</span>' : '') + '</div></div>' +
+            '<div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;"><div style="display:flex; justify-content:flex-start; align-items:center; gap:6px;">' + (c.group ? '<span class="badge group-badge" data-group="' + c.group + '">' + c.group + '</span>' : '') + '</div><div style="font-size:15px; font-weight:700; color:#00A8A8; text-align:center; white-space:nowrap;">' + c.alias + '</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">' + (c.kind === '신용' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#FF00FF; color:#FFFFFF;">신용</span>' : '') + (c.kind === '체크' ? '<span class="badge" style="width:42px; height:24px; font-size:11px; font-weight:700; background-color:#007BFF; color:#FFFFFF;">체크</span>' : '') + '</div></div>' +
             cardSubAliasHTML(c) +
             '<div style="font-size:15px; font-weight:700; color:#FF0000; text-align:right; white-space:nowrap; margin-top:-6.6px; margin-bottom:-7.8px;">미확인 (' + loadCardUsageRecords().filter(function (r) { return r.cardId === c.id && r.confirmed !== true; }).length + '건)</div>' +
             '<div class="stock-sub-card" onclick="selectCardDetail(this)" style="cursor:pointer; background-color:' + (isSel ? '#FFF4E5' : '#F5F5F5') + '; border:' + (isSel ? '3px solid #FF8C00' : '1px solid #E0E0E0') + '; border-radius:12px; box-shadow:none; padding:4px 12px 8px; margin-top:12px;">' + cardRowsHTML(rows) + '</div></div>' + cardDetailUsageSampleHTML(!!c.discountTarget, c.id);
@@ -8561,7 +8567,7 @@ function cfOpenCalViewer() {
     document.body.appendChild(ov);
     // 스와이프: 좌우 = 이전/다음 달 (화면 너비 40% 이상 밀면 전환), 상하 = 이전/다음 연도 (화면 높이 30% 이상 밀면 전환)
     // 옆 페이지는 현재 페이지 옆에 붙어 있다가 손가락을 따라 함께 움직임
-    let tx = null, ty = null, mode = null, busy = false, W = 0, H = 0;
+    let tx = null, ty = null, mode = null, busy = false, W = 0, H = 0, lastY = null, lastTs = 0, vy = 0;
     const stage = () => ov.querySelector('.cfc-stage');
     const movePanes = (x, y, transition) => ov.querySelectorAll('.cfc-pane').forEach(p => {
       const ox = Number(p.dataset.off) || 0;
@@ -8597,7 +8603,7 @@ function cfOpenCalViewer() {
     };
     ov.addEventListener('touchstart', e => {
       if (busy) return;
-      tx = e.touches[0].clientX; ty = e.touches[0].clientY; mode = null;
+      tx = e.touches[0].clientX; ty = e.touches[0].clientY; mode = null; lastY = null; vy = 0;
     }, { passive: true });
     ov.addEventListener('touchmove', e => {
       if (tx === null || busy) return;
@@ -8608,7 +8614,12 @@ function cfOpenCalViewer() {
         else if (Math.abs(dy) > Math.abs(dx) * 1.2) { mode = 'y'; startSides('y'); }
       }
       if (mode === 'x') movePanes(dx, 0, 'none');
-      if (mode === 'y') movePanes(0, dy, 'none');
+      if (mode === 'y') {
+        const now = e.timeStamp, cy = e.touches[0].clientY;
+        if (lastY !== null && now > lastTs) vy = (cy - lastY) / (now - lastTs);
+        lastY = cy; lastTs = now;
+        movePanes(0, dy, 'none');
+      }
     }, { passive: true });
     ov.addEventListener('touchend', e => {
       if (tx === null) return;
@@ -8627,7 +8638,8 @@ function cfOpenCalViewer() {
           movePanes(0, 0, 'transform 0.2s ease');
         }
       } else if (md === 'y') {
-        if (Math.abs(dy) >= H * 0.3) {
+        const flick = Math.abs(vy) >= 0.5 && Math.abs(dy) >= 30 && Math.sign(vy) === Math.sign(dy);
+        if (Math.abs(dy) >= H * 0.2 || flick) {
           const dir = dy < 0 ? 1 : -1;
           busy = true;
           movePanes(0, -dir * H, 'transform 0.2s ease');
@@ -21406,8 +21418,8 @@ function renderMainPageSummaryCards() {
 
       <!-- 총가입금액 -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px;">
-        <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">총가입금액</span>
-        <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">${formatNumber(totalInvestment)}</span>
+        <span style="font-size: 14px; font-weight: 700; color: #FF0000;">총가입금액</span>
+        <span style="font-size: 14px; font-weight: 700; color: #FF0000;">${formatNumber(totalInvestment)}</span>
       </div>
 
       <!-- 일반가입금액 -->
@@ -23533,8 +23545,8 @@ function renderProductsList() {
 
           <!-- 총가입금액 -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px;">
-            <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">총가입금액</span>
-            <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">${formatNumber(totalInvestment)}</span>
+            <span style="font-size: 14px; font-weight: 700; color: #FF0000;">총가입금액</span>
+            <span style="font-size: 14px; font-weight: 700; color: #FF0000;">${formatNumber(totalInvestment)}</span>
           </div>
 
           <!-- 일반가입금액 -->
@@ -23708,8 +23720,8 @@ function renderProductsList() {
 
             <!-- 총가입금액 -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px;">
-              <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">총가입금액</span>
-              <span style="font-size: 14px; font-weight: 600; color: #1A1A1A;">${formatNumber(data.investment)}</span>
+              <span style="font-size: 14px; font-weight: 700; color: #FF0000;">총가입금액</span>
+              <span style="font-size: 14px; font-weight: 700; color: #FF0000;">${formatNumber(data.investment)}</span>
             </div>
 
             <!-- 일반가입금액 -->
